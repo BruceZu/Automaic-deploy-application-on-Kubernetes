@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: white-gitlab
+  namespace: white
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: white-gitlab 
+  template:
+    metadata:
+      labels:
+        run: white-gitlab 
+    spec:
+      containers:
+      - image: gitlab/gitlab-ce:8.13.6-ce.0
+        imagePullPolicy: Always
+        name: white-gitlab
+        ports:
+        - containerPort: 443
+          protocol: TCP
+        - containerPort: 22
+          protocol: TCP
+        - containerPort: 80
+          protocol: TCP

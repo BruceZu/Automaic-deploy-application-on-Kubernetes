@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: white-jenkins 
+  namespace: white
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: white-jenkins 
+  template:
+    metadata:
+      labels:
+        run: white-jenkins 
+    spec:
+      containers:
+      - image: jenkins:2.19.3
+        imagePullPolicy: Always
+        name: white-jenkins 
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 50000
+          protocol: TCP

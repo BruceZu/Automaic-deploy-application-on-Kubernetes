@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: white-nexus 
+  namespace: white
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: white-nexus 
+  template:
+    metadata:
+      labels:
+        run: white-nexus 
+    spec:
+      containers:
+      - image: sonatype/nexus:2.14.1-01 
+        imagePullPolicy: Always
+        name: white-nexus 
+        ports:
+        - containerPort: 8081
+          protocol: TCP

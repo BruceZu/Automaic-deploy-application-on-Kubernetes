@@ -1,25 +1,25 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: sonarqube
+  name: white-sonarqube 
   namespace: white
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: sonarqube
+      run: white-sonarqube 
   template:
     metadata:
       labels:
-        run: sonarqube
+        run: white-sonarqube 
     spec:
       containers:
       - env:
         - name: SONARQUBE_WEB_JVM_OPTS
           value: -Xmx512m -Xms128m -XX:+HeapDumpOnOutOfMemoryError -Dh2.bindAddress=127.0.0.1
-        image: sonarqube
+        image: sonarqube:6.1
         imagePullPolicy: Always
-        name: sonarqube
+        name: white-sonarqube 
         ports:
         - containerPort: 9092
           protocol: TCP

@@ -1,0 +1,25 @@
+---
+- hosts: k8s-09
+  vars:
+    namesapce: ansible
+    gitlab_image:
+    jenkins_image:
+    sonarqube_image:
+    nexus_image:
+    gitlab_deploy_suffix_name: gitlab
+    jenkins_deploy_suffix_name: jenkins
+    sonarqube_deploy_suffix_name: sonarqube
+    nexus_deploy_suffix_name: nexus
+    deploy_yaml_file_path: /root/temp-bruce/deploy-on-k8s/yaml
+  remote_user: root
+  tasks:
+  - name: create namspace
+    command: kubectl create ns "{{namesapce}}" 
+  - name: deploy GitLab
+    command: kubectl create -f "{{deploy_yaml_file_path}}/deploy-gitlab.yaml"
+  - name: deploy Jenkins
+    command: kubectl create -f "{{deploy_yaml_file_path}}/deploy-jenkins.yaml"
+  - name: deploy SonarQube
+    command: kubectl create -f "{{deploy_yaml_file_path}}/deploy-sonarqube.yaml"
+  - name: deploy Nexus
+    command: kubectl create -f "{{deploy_yaml_file_path}}/deploy-nexus.yaml"

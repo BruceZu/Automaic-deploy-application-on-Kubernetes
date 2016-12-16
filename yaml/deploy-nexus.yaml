@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: white-nexus 
-  namespace: white
+  name: "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
+  namespace: "{{ namespace }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: white-nexus 
+      run: "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
   template:
     metadata:
       labels:
-        run: white-nexus 
+        run: "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
     spec:
       containers:
-      - image: sonatype/nexus:2.14.1-01 
+      - image: "{{ nexus_image }}"
         imagePullPolicy: Always
-        name: white-nexus 
+        name: "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
         ports:
         - containerPort: 8081
           protocol: TCP

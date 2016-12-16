@@ -2,51 +2,109 @@
 - hosts: k8s-09
 
   vars:
-    namesapce: ansible
-    gitlab_image:
-    jenkins_image:
-    sonarqube_image:
-    nexus_image:
+    namespace: ansible
+
+    gitlab_image: gitlab/gitlab-ce:8.13.6-ce.0
+    jenkins_image: jenkins:2.19.3
+    sonarqube_image: sonarqube:6.1
+    nexus_image: sonatype/nexus:2.14.1-01
+
     gitlab_deploy_suffix_name: gitlab
     jenkins_deploy_suffix_name: jenkins
     sonarqube_deploy_suffix_name: sonarqube
     nexus_deploy_suffix_name: nexus
+
     deploy_yaml_file_path: /root/temp-bruce/deploy-on-k8s/yaml
 
   remote_user: root
 
   handlers:
-    - name: create Gitlab service
-      command: kubectl expose deployment "{{ namespace }}"_"{{ gitlab_deploy_suffix_name }}"
-                 --type=NodePort
-      listen: "create services"
-
     - name: create Jenkins service
-      command: kubectl expose deployment "{{ namespace }}"_"{{ jenkins_deploy_suffix_name }}"
-                 --type=NodPort
+      command: kubectl expose deployment "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
+                 --type=NodePort  --namespace="{{ namespace }}"
       listen: "create services"
 
     - name: create Sonarqube service
-      command: kubectl expose deployment "{{ namespace }}"_"{{ sonarqube_deploy_suffix_name }}"
-                 --type=NodPort
+      command: kubectl expose deployment "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"
+                 --type=NodePort   --namespace="{{ namespace }}"
       listen: "create services"
 
     - name: create Nexus service
-      command: kubectl expose deployment "{{ namespace }}"_"{{ nexus_deploy_suffix_name }}"
-                 --type=NodPort
+      command: kubectl expose deployment "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
+                 --type=NodePort   --namespace="{{ namespace }}"
       listen: "create services"
 
+    - name: create Gitlab service
+      command: kubectl expose deployment "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"
+                 --type=NodePort  --namespace="{{ namespace }}"
+      listen: "create gitlab services"
+
+# check pwd, kubectl and kube-dn, git pull playbook, included files and template files.
+# before as state deployment we can also do some clean work in the inverse order of creating them 
   pre_tasks:
+    - name: copy template files after apply jinja2 filters to them.
+      template:
+        src: "{{ deploy_yaml_file_path }}/deploy-{{ item }}.yaml"
+        dest: "/root/deploy-{{ item }}.yaml"
+      with_items:
+        - "{{ gitlab_deploy_suffix_name }}"
+        - "{{ jenkins_deploy_suffix_name }}"
+        - "{{ sonarqube_deploy_suffix_name }}"
+        - "{{ nexus_deploy_suffix_name }}"
+  roles:
+# create deplyments, pods and containers
   tasks:
-    - name: create namspace {{ namespace }}
-      command: kubectl create ns "{{ namesapce }}" 
-    - name: deploy GitLab
-      command: kubectl create -f "{{ deploy_yaml_file_path }}/deploy-gitlab.yaml"
-    - name: deploy Jenkins
-      command: kubectl create -f "{{ deploy_yaml_file_path }}/deploy-jenkins.yaml"
-    - name: deploy SonarQube
-      command: kubectl create -f "{{ deploy_yaml_file_path }}/deploy-sonarqube.yaml"
-    - name: deploy Nexus
-      command: kubectl create -f "{{ deploy_yaml_file_path }}/deploy-nexus.yaml"
+    - name: check namespace "{{ namespace }}" exist or not
+      command: kubectl get ns "{{ namespace }}"
+      register: result
+      ignore_errors: True
+
+    - name: create namspace "{{ namespace }}" when it is not there
+      command: kubectl create ns "{{ namespace }}"
+      register: ns_created
+      ignore_errors: True
+      when: result|failed
+
+    - name: check deployment "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
+      command: "kubectl get deploy {{ namespace }}-{{ gitlab_deploy_suffix_name }} --namespace={{ namespace }}"
+      register: gitlab_exist
+      ignore_errors: True
+      when: ns_created|succeeded
+
+    - name: deploy "{{ gitlab_deploy_suffix_name }}" in namespace "{{ namespace }}"
+      command: kubectl create -f deploy-gitlab.yaml
+      when: gitlab_exist|failed
+      notify: "create {{ gitlab_deploy_suffix_name }} services"
+
+    - name: check deployment "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
+      command: "kubectl get deploy {{ namespace }}-{{ jenkins_deploy_suffix_name }} --namespace={{ namespace }}"
+      register: jenkins_exist
+      ignore_errors: True
+
+    - name: deploy "{{ jenkins_deploy_suffix_name }}" in namespace "{{ namespace }}"
+      command: kubectl create -f deploy-jenkins.yaml
+      when: jenkins_exist|failed
+
+    - name: check deployment "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
+      command: "kubectl get deploy {{ namespace }}-{{ sonarqube_deploy_suffix_name }} --namespace={{ namespace }}"
+      register: sonarqube_exist
+      ignore_errors: True
+
+    - name: deploy "{{ sonarqube_deploy_suffix_name }}" in namespace "{{ namespace }}"
+      command: kubectl create -f deploy-sonarqube.yaml
+      when: sonarqube_exist|failed
+
+    - name: check deployment "{{ namespace }}-{{ nexus_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
+      command: "kubectl get deploy {{ namespace }}-{{ nexus_deploy_suffix_name }} --namespace={{ namespace }}"
+      register: nexus_exist
+      ignore_errors: True
+
+    - name: deploy "{{ nexus_deploy_suffix_name }}" in namespace "{{ namespace }}"
+      command: kubectl create -f deploy-nexus.yaml
+      when: nexus_exist|failed
+
+    - name: start to create services
+      command: echo ""
       notify: "create services"
+# validation of the deployments, pods and containers
   post_tasks:

@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: white-jenkins 
-  namespace: white
+  name: "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
+  namespace: "{{ namespace }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: white-jenkins 
+      run: "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
   template:
     metadata:
       labels:
-        run: white-jenkins 
+        run: "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
     spec:
       containers:
-      - image: jenkins:2.19.3
+      - image: "{{ jenkins_image }}"
         imagePullPolicy: Always
-        name: white-jenkins 
+        name: "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
         ports:
         - containerPort: 8080
           protocol: TCP

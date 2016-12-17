@@ -39,8 +39,8 @@
                  --type=NodePort  --namespace="{{ namespace }}"
       listen: "create gitlab services"
 
-# check pwd, kubectl and kube-dn, git pull playbook, included files and template files.
-# before as state deployment we can also do some clean work in the inverse order of creating them 
+# Ansible can not guarantee idempotency for applications on k8s cluster
+# We have to do it by ourself. 
   pre_tasks:
     - name: copy template files after apply jinja2 filters to them.
       template:
@@ -52,7 +52,7 @@
         - "{{ sonarqube_deploy_suffix_name }}"
         - "{{ nexus_deploy_suffix_name }}"
   roles:
-# create deplyments, pods and containers
+# Create deplyments, pods and containers
   tasks:
     - name: check namespace "{{ namespace }}" exist or not
       command: kubectl get ns "{{ namespace }}"
@@ -106,5 +106,5 @@
     - name: start to create services
       command: echo ""
       notify: "create services"
-# validation of the deployments, pods and containers
+# Validation of the deployments, pods and containers
   post_tasks:

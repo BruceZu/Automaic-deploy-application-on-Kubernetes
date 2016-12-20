@@ -24,22 +24,22 @@
     - name: create Jenkins service
       command: kubectl expose deployment "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
                  --type=NodePort  --namespace="{{ namespace }}"
-      listen: "create services"
+      listen: "create jenkins service"
 
     - name: create Sonarqube service
       command: kubectl expose deployment "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"
                  --type=NodePort   --namespace="{{ namespace }}"
-      listen: "create services"
+      listen: "create sonarqube service"
 
     - name: create Nexus service
       command: kubectl expose deployment "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
                  --type=NodePort   --namespace="{{ namespace }}"
-      listen: "create services"
+      listen: "create nexus service"
 
     - name: create Gitlab service
       command: kubectl expose deployment "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"
                  --type=NodePort  --namespace="{{ namespace }}"
-      listen: "create gitlab services"
+      listen: "create gitlab service"
 
 # Ansible can not guarantee idempotency for applications on k8s cluster
 # We have to do it by ourself. 
@@ -132,6 +132,10 @@
 # Service
     - name: start to create services
       command: echo ""
-      notify: "create services"
+      notify:
+        - create jenkins service
+        - create sonarqube service
+        - create nexus service
+        - create gitlab service
 # Validation of the deployments, pods and containers
   post_tasks:

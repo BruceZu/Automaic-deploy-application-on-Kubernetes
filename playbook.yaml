@@ -1,8 +1,11 @@
 ---
 - hosts: k8s-09
-  gather_facts: no
-  vars:
   remote_user: root
+
+  gather_facts: no
+
+  vars:
+#  vars_files:
 
   handlers:
   pre_tasks:

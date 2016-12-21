@@ -1,0 +1,15 @@
+---
+# For test reason the namespace can be provided via 'extra-vars' in command
+# 'nsible-playbook playbook.yaml  --extra-vars "namespace=ansible"'
+
+namespace: ansible
+
+gitlab_image: gitlab/gitlab-ce:8.13.6-ce.0
+jenkins_image: jenkins:2.19.3
+sonarqube_image: sonarqube:6.1
+nexus_image: sonatype/nexus:2.14.1-01
+
+gitlab_deploy_suffix_name: gitlab
+jenkins_deploy_suffix_name: jenkins
+sonarqube_deploy_suffix_name: sonarqube
+nexus_deploy_suffix_name: nexus

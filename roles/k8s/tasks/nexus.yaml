@@ -1,0 +1,15 @@
+---
+- name: check deployment "{{ namespace }}-{{ nexus_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
+  command: "kubectl get deploy {{ namespace }}-{{ nexus_deploy_suffix_name }} --namespace={{ namespace }}"
+  register: nexus_exist
+  ignore_errors: True
+
+- name: If "{{ nexus_deploy_suffix_name }}" does not exist in namespace "{{ namespace }}", deploy it  .
+  command: kubectl create -f deploy-nexus.yaml
+  register: nexus_created
+  ignore_errors: True
+  when: nexus_exist|failed
+
+- name: "Report: Failed to create {{ nexus_deploy_suffix_name }} in namespace {{ namespace }}"
+  command:  echo "failed to create {{ nexus_deploy_suffix_name }}" in namespace "{{ namespace }}"
+  when: nexus_created|failed

@@ -1,0 +1,16 @@
+---
+- name: check deployment "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
+  command: "kubectl get deploy {{ namespace }}-{{ gitlab_deploy_suffix_name }} --namespace={{ namespace }}"
+  register: gitlab_exist
+  ignore_errors: True
+  when: ns_created|succeeded
+
+- name: If "{{ gitlab_deploy_suffix_name }}" does not exist in namespace "{{ namespace }}", deploy it  .
+  command: kubectl create -f deploy-gitlab.yaml
+  register: gitlab_created
+  ignore_errors: True
+  when: gitlab_exist|failed
+
+- name: "Report: Failed to create {{ gitlab_deploy_suffix_name }} in namespace {{ namespace }}"
+  command: echo "failed to create {{ gitlab_deploy_suffix_name }}" in namespace "{{ namespace }}"
+  when: gitlab_created|failed

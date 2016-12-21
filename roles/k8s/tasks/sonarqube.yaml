@@ -1,0 +1,15 @@
+---
+- name: check deployment "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
+  command: "kubectl get deploy {{ namespace }}-{{ sonarqube_deploy_suffix_name }} --namespace={{ namespace }}"
+  register: sonarqube_exist
+  ignore_errors: True
+
+- name: If "{{ sonarqube_deploy_suffix_name }}" does not exist in namespace "{{ namespace }}", deploy it  .
+  command: kubectl create -f deploy-sonarqube.yaml
+  register: sonarqube_created
+  ignore_errors: True
+  when: sonarqube_exist|failed
+
+- name: "Report: Failed to create {{ sonarqube_deploy_suffix_name }} in namespace {{ namespace }}"
+  command:  echo "failed to create {{ sonarqube_deploy_suffix_name }}" in namespace "{{ namespace }}"
+  when: sonarqube_created|failed

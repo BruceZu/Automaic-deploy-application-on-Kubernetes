@@ -1,0 +1,15 @@
+---
+- name: check deployment "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
+  command: "kubectl get deploy {{ namespace }}-{{ jenkins_deploy_suffix_name }} --namespace={{ namespace }}"
+  register: jenkins_exist
+  ignore_errors: True
+
+- name: If "{{ jenkins_deploy_suffix_name }}" does not exist in namespace "{{ namespace }}", deploy it  .
+  command: kubectl create -f deploy-jenkins.yaml
+  register: jenkins_created
+  ignore_errors: True
+  when: jenkins_exist|failed
+
+- name: "Report: Failed to create {{ jenkins_deploy_suffix_name }} in namespace {{ namespace }}"
+  command:  echo "failed to create {{ jenkins_deploy_suffix_name }}" in namespace "{{ namespace }}"
+  when: jenkins_created|failed

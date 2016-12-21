@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
+  name: "{{ [namespace, jenkins_deploy_suffix_name]|join('-') }}"
   namespace: "{{ namespace }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
+      run: "{{ [namespace, jenkins_deploy_suffix_name]|join('-') }}"
   template:
     metadata:
       labels:
-        run: "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
+        run: "{{ [namespace, jenkins_deploy_suffix_name]|join('-') }}"
     spec:
       containers:
       - image: "{{ jenkins_image }}"
         imagePullPolicy: Always
-        name: "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
+        name: "{{ [namespace, jenkins_deploy_suffix_name]|join('-') }}"
         ports:
         - containerPort: 8080
           protocol: TCP

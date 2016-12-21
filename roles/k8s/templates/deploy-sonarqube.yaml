@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"
+  name: "{{ [namespace, sonarqube_deploy_suffix_name]|join('-') }}"
   namespace: "{{ namespace }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"
+      run: "{{ [namespace, sonarqube_deploy_suffix_name]|join('-') }}"
   template:
     metadata:
       labels:
-        run: "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"
+        run: "{{ [namespace, sonarqube_deploy_suffix_name]|join('-') }}"
     spec:
       containers:
       - env:
@@ -19,7 +19,7 @@ spec:
           value: -Xmx512m -Xms128m -XX:+HeapDumpOnOutOfMemoryError -Dh2.bindAddress=127.0.0.1
         image: "{{ sonarqube_image }}"
         imagePullPolicy: Always
-        name: "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"
+        name: "{{ [namespace, sonarqube_deploy_suffix_name]|join('-') }}"
         ports:
         - containerPort: 9092
           protocol: TCP

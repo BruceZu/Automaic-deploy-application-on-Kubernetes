@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"
+  name: "{{ [namespace, gitlab_deploy_suffix_name]|join('-') }}"
   namespace: "{{ namespace }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"
+      run: "{{ [namespace, gitlab_deploy_suffix_name]|join('-') }}"
   template:
     metadata:
       labels:
-        run: "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"
+        run: "{{ [namespace, gitlab_deploy_suffix_name]|join('-') }}"
     spec:
       containers:
       - image: "{{ gitlab_image }}"
         imagePullPolicy: Always
-        name: "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"
+        name: "{{ [namespace, gitlab_deploy_suffix_name]|join('-') }}"
         ports:
         - containerPort: 443
           protocol: TCP

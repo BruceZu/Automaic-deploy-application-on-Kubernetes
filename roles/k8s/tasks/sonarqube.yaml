@@ -1,6 +1,6 @@
 ---
-- name: check deployment "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
-  command: "kubectl get deploy {{ namespace }}-{{ sonarqube_deploy_suffix_name }} --namespace={{ namespace }}"
+- name: check deployment "{{ [namespace, sonarqube_deploy_suffix_name]|join('-') }}"  exist or not in namespace "{{ namespace }}"
+  command: "kubectl get deploy {{ [namespace, sonarqube_deploy_suffix_name]|join('-') }} --namespace={{ namespace }}"
   register: sonarqube_exist
   ignore_errors: True
 

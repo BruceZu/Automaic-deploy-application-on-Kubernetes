@@ -1,6 +1,6 @@
 ---
-- name: check deployment "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"  exist or not in namespace "{{ namespace }}"
-  command: "kubectl get deploy {{ namespace }}-{{ gitlab_deploy_suffix_name }} --namespace={{ namespace }}"
+- name: check deployment "{{ [namespace, gitlab_deploy_suffix_name]|join('-') }}"  exist or not in namespace "{{ namespace }}"
+  command: "kubectl get deploy {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} --namespace={{ namespace }}"
   register: gitlab_exist
   ignore_errors: True
   when: ns_created|succeeded

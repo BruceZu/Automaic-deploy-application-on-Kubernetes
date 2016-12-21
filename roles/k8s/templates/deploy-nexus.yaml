@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
+  name: "{{ [namespace, nexus_deploy_suffix_name]|join('-') }}"
   namespace: "{{ namespace }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      run: "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
+      run: "{{ [namespace, nexus_deploy_suffix_name]|join('-') }}"
   template:
     metadata:
       labels:
-        run: "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
+        run: "{{ [namespace, nexus_deploy_suffix_name]|join('-') }}"
     spec:
       containers:
       - image: "{{ nexus_image }}"
         imagePullPolicy: Always
-        name: "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
+        name: "{{ [namespace, nexus_deploy_suffix_name]|join('-') }}"
         ports:
         - containerPort: 8081
           protocol: TCP

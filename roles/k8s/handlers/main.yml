@@ -1,0 +1,20 @@
+---
+    - name: create Jenkins service
+      command: kubectl expose deployment "{{ namespace }}-{{ jenkins_deploy_suffix_name }}"
+                 --type=NodePort  --namespace="{{ namespace }}"
+      listen: "create jenkins service"
+
+    - name: create Sonarqube service
+      command: kubectl expose deployment "{{ namespace }}-{{ sonarqube_deploy_suffix_name }}"
+                 --type=NodePort   --namespace="{{ namespace }}"
+      listen: "create sonarqube service"
+
+    - name: create Nexus service
+      command: kubectl expose deployment "{{ namespace }}-{{ nexus_deploy_suffix_name }}"
+                 --type=NodePort   --namespace="{{ namespace }}"
+      listen: "create nexus service"
+
+    - name: create Gitlab service
+      command: kubectl expose deployment "{{ namespace }}-{{ gitlab_deploy_suffix_name }}"
+                 --type=NodePort  --namespace="{{ namespace }}"
+      listen: "create gitlab service"

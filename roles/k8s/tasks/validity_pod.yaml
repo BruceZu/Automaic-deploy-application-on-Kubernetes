@@ -1,0 +1,12 @@
+---
+- name: validity status of pods
+  command: bash -c
+    "kubectl get pod {{ pod_name }}  --namespace={{ namespace }} | awk 'FNR>1{print $3 }'"
+  register: pod_status
+
+- name: check the pod status value
+  assert:
+    that:
+      - pod_status.stdout.find('Running')!=-1
+    msg: "{{ pod_name }} status: {{ pod_status }}"
+  ignore_errors: True

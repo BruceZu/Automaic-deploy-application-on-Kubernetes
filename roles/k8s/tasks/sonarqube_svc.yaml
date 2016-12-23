@@ -1,0 +1,31 @@
+---
+- name: check "{{ sonarqube_deploy_suffix_name }}" svc exist or not
+  command: "kubectl get svc {{ [namespace, sonarqube_deploy_suffix_name]|join('-') }} --namespace={{ namespace }}"
+  register: sonarqube_svc_exists
+  ignore_errors: True
+
+- name: "create svc  {{ [namespace, sonarqube_deploy_suffix_name]|join('-') }} conditionally"
+  shell: "msg='notify to create  {{ [namespace, sonarqube_deploy_suffix_name]|join('-') }} service'"
+  notify: "create {{ sonarqube_deploy_suffix_name }} service"
+  when: (( sonarqube_exist|succeeded ) or ( sonarqube_created|succeeded )) and ( sonarqube_svc_exists|failed )
+  ignore_errors: True
+
+- name: "check status of svc {{ [namespace, sonarqube_deploy_suffix_name]|join('-') }}"
+  assert:
+    that:
+      - ( sonarqube_exist|succeeded ) or ( sonarqube_created|succeeded )
+    msg: "Need check  {{ [namespace, sonarqube_deploy_suffix_name]|join('-') }} service status"
+  ignore_errors: True
+
+- name: "Report failed result."
+  fail:
+    msg: "failed to create {{ [namespace, sonarqube_deploy_suffix_name]|join('-') }} service: deployment is not available."
+  when:  ( sonarqube_exist|failed ) and ( sonarqube_created|failed ) and ( sonarqube_svc_exists|failed )
+  ignore_errors: True
+
+- name: "Report wrong status"
+  fail:
+    msg: "Wrong status: {{ [namespace, sonarqube_deploy_suffix_name]|join('-') }} service exists but deployment is not available."
+  when:  ( sonarqube_exist|failed ) and ( sonarqube_created|failed ) and ( sonarqube_svc_exists|succeeded )
+  ignore_errors: True
+

@@ -1,0 +1,31 @@
+---
+- name: check "{{ nexus_deploy_suffix_name }}" svc exist or not
+  command: "kubectl get svc {{ [namespace, nexus_deploy_suffix_name]|join('-') }} --namespace={{ namespace }}"
+  register: nexus_svc_exists
+  ignore_errors: True
+
+- name: "create svc  {{ [namespace, nexus_deploy_suffix_name]|join('-') }} conditionally"
+  shell: "msg='notify to create  {{ [namespace, nexus_deploy_suffix_name]|join('-') }} service'"
+  notify: "create {{ nexus_deploy_suffix_name }} service"
+  when: (( nexus_exist|succeeded ) or ( nexus_created|succeeded )) and ( nexus_svc_exists|failed )
+  ignore_errors: True
+
+- name: "check status of svc {{ [namespace, nexus_deploy_suffix_name]|join('-') }}"
+  assert:
+    that:
+      - ( nexus_exist|succeeded ) or ( nexus_created|succeeded )
+    msg: "Need check  {{ [namespace, nexus_deploy_suffix_name]|join('-') }} service status"
+  ignore_errors: True
+
+- name: "Report failed result."
+  fail:
+    msg: "failed to create {{ [namespace, nexus_deploy_suffix_name]|join('-') }} service: deployment is not available."
+  when:  ( nexus_exist|failed ) and ( nexus_created|failed ) and ( nexus_svc_exists|failed )
+  ignore_errors: True
+
+- name: "Report wrong status"
+  fail:
+    msg: "Wrong status: {{ [namespace, nexus_deploy_suffix_name]|join('-') }} service exists but deployment is not available."
+  when:  ( nexus_exist|failed ) and ( nexus_created|failed ) and ( nexus_svc_exists|succeeded )
+  ignore_errors: True
+

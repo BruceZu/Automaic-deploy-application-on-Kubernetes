@@ -30,52 +30,7 @@
 - include: nexus.yaml
 
 # Service
-# Note: register does not support variable.
-- name: check "{{ gitlab_deploy_suffix_name }}" svc exist or not
-  command: "kubectl get svc {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} --namespace={{ namespace }}" 
-  register: gitlab_svc_exists
-  ignore_errors: True
-
-- name: "create svc  {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} if it does not exist when its deployment exists or just created succeefully"
-  shell: "msg='notify to create  {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} service'"
-  notify: "create {{ gitlab_deploy_suffix_name }} service"
-  when: (( gitlab_exist|succeeded ) or ( gitlab_created|succeeded )) and ( gitlab_svc_exists|failed )
-  ignore_errors: True
-# gitlab exits | gitlab created
-#  T           ->    /
-#  N           ->    create
-#
-#  | gitlab deploy | gitlab svc
-# 1   T              N -> create (assume always successfully) -> Y
-# 2   T              Y
-# 3   N              N
-# 4   N              Y
-#
-# 1,2: expected result. 1 -> 2.
-# 3: failed
-# 4: in wrong status
-- name: "check status of svc {{ [namespace, gitlab_deploy_suffix_name]|join('-') }}"
-  assert:
-    that:
-      - ( gitlab_exist|succeeded ) or ( gitlab_created|succeeded )
-    msg: "Need check  {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} service status"
-  ignore_errors: True
-
-- name: "Report failed result."
-  fail:
-    msg: "failed to create {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} service: deployment is not available."  
-  when:  ( gitlab_exist|failed ) and ( gitlab_created|failed ) and ( gitlab_svc_exists|failed )
-  ignore_errors: True
-
-- name: "Report wrong status"
-  fail:
-    msg: "Wrong status: {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} service exists but deployment is not available."
-  when:  ( gitlab_exist|failed ) and ( gitlab_created|failed ) and ( gitlab_svc_exists|succeeded )
-  ignore_errors: True
-
-- name: start to create services
-  shell: "msg='notify to create services'"
-  notify:
-    - create jenkins service
-    - create sonarqube service
-    - create nexus service
+- include: gitlab_svc.yaml
+- include: jenkins_svc.yaml
+- include: sonarqube_svc.yaml
+- include: nexus_svc.yaml

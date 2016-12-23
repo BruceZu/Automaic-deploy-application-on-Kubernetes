@@ -1,0 +1,31 @@
+---
+- name: check "{{ jenkins_deploy_suffix_name }}" svc exist or not
+  command: "kubectl get svc {{ [namespace, jenkins_deploy_suffix_name]|join('-') }} --namespace={{ namespace }}"
+  register: jenkins_svc_exists
+  ignore_errors: True
+
+- name: "create svc  {{ [namespace, jenkins_deploy_suffix_name]|join('-') }} conditionally"
+  shell: "msg='notify to create  {{ [namespace, jenkins_deploy_suffix_name]|join('-') }} service'"
+  notify: "create {{ jenkins_deploy_suffix_name }} service"
+  when: (( jenkins_exist|succeeded ) or ( jenkins_created|succeeded )) and ( jenkins_svc_exists|failed )
+  ignore_errors: True
+
+- name: "check status of svc {{ [namespace, jenkins_deploy_suffix_name]|join('-') }}"
+  assert:
+    that:
+      - ( jenkins_exist|succeeded ) or ( jenkins_created|succeeded )
+    msg: "Need check  {{ [namespace, jenkins_deploy_suffix_name]|join('-') }} service status"
+  ignore_errors: True
+
+- name: "Report failed result."
+  fail:
+    msg: "failed to create {{ [namespace, jenkins_deploy_suffix_name]|join('-') }} service: deployment is not available."
+  when:  ( jenkins_exist|failed ) and ( jenkins_created|failed ) and ( jenkins_svc_exists|failed )
+  ignore_errors: True
+
+- name: "Report wrong status"
+  fail:
+    msg: "Wrong status: {{ [namespace, jenkins_deploy_suffix_name]|join('-') }} service exists but deployment is not available."
+  when:  ( jenkins_exist|failed ) and ( jenkins_created|failed ) and ( jenkins_svc_exists|succeeded )
+  ignore_errors: True
+

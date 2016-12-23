@@ -19,6 +19,13 @@
   register: ns_created
   ignore_errors: True
   when: result|failed
+
+- name: wait 3 second
+  pause: 
+    seconds: 3
+    prompt: "make sure the namspace {{ namespace }} is created before deployment starts"
+  when: result|failed
+
 # Ansible can not guarantee idempotency for applications on k8s cluster
 # We have to do it by ourself to validate the status of the deployments, pods,
 # containers, and services.

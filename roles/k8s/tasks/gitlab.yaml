@@ -3,7 +3,6 @@
   command: "kubectl get deploy {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} --namespace={{ namespace }}"
   register: gitlab_exist
   ignore_errors: True
-  when: ns_created|succeeded
 
 - name: If "{{ gitlab_deploy_suffix_name }}" does not exist in namespace "{{ namespace }}", deploy it  .
   command: kubectl create -f deploy-gitlab.yaml

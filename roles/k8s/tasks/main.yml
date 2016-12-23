@@ -30,14 +30,17 @@
 # We have to do it by ourself to validate the status of the deployments, pods,
 # containers, and services.
 # Create deplyments, pods and containers
-
-- include: gitlab.yaml
-- include: jenkins.yaml
-- include: sonarqube.yaml
-- include: nexus.yaml
+- include: "{{ item }}.yaml"
+  with_items:
+    - "{{ gitlab_deploy_suffix_name }}"
+    - "{{ jenkins_deploy_suffix_name }}"
+    - "{{ sonarqube_deploy_suffix_name }}"
+    - "{{ nexus_deploy_suffix_name }}"
 
 # Service
-- include: gitlab_svc.yaml
-- include: jenkins_svc.yaml
-- include: sonarqube_svc.yaml
-- include: nexus_svc.yaml
+- include: "{{ item }}_svc.yaml"
+  with_items:
+    - "{{ gitlab_deploy_suffix_name }}"
+    - "{{ jenkins_deploy_suffix_name }}"
+    - "{{ sonarqube_deploy_suffix_name }}"
+    - "{{ nexus_deploy_suffix_name }}"

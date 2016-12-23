@@ -8,7 +8,9 @@
 - name: "create svc  {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} conditionally"
   shell: "msg='notify to create  {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} service'"
   notify: "create {{ gitlab_deploy_suffix_name }} service"
-  when: (( gitlab_exist|succeeded ) or ( gitlab_created|succeeded )) and ( gitlab_svc_exists|failed )
+  when:
+    - ( gitlab_exist|succeeded ) or ( gitlab_created|succeeded )
+    - gitlab_svc_exists|failed
   ignore_errors: True
 
 # gitlab exits | gitlab created
@@ -34,12 +36,18 @@
 - name: "Report failed result."
   fail:
     msg: "failed to create {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} service: deployment is not available."
-  when:  ( gitlab_exist|failed ) and ( gitlab_created|failed ) and ( gitlab_svc_exists|failed )
+  when:
+    - gitlab_exist|failed
+    - gitlab_created|failed
+    - gitlab_svc_exists|failed
   ignore_errors: True
 
 - name: "Report wrong status"
   fail:
     msg: "Wrong status: {{ [namespace, gitlab_deploy_suffix_name]|join('-') }} service exists but deployment is not available."
-  when:  ( gitlab_exist|failed ) and ( gitlab_created|failed ) and ( gitlab_svc_exists|succeeded )
+  when:
+    - gitlab_exist|failed
+    - gitlab_created|failed
+    - gitlab_svc_exists|succeeded
   ignore_errors: True
 

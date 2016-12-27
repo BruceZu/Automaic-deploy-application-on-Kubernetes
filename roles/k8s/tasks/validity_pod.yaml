@@ -1,12 +1,22 @@
 ---
-- name: validity status of pods
+- name: check pod names created by k8s
   command: bash -c
-    "kubectl get pod {{ pod_name }}  --namespace={{ namespace }} | awk 'FNR>1{print $3 }'"
-  register: pod_status
+    "kubectl get pod --namespace={{ namespace }} | awk 'FNR>1{print $1}'"
+  register: pods
 
-- name: check the pod status value
-  assert:
-    that:
-      - pod_status.stdout.find('Running')!=-1
-    msg: "{{ pod_name }} status: {{ pod_status }}"
-  ignore_errors: True
+- name: show pods named
+  debug: msg="{{ pods.stdout.split() }}"
+  when: pods|succeeded
+
+- name: get status of pods
+  command: bash -c
+    "kubectl get pod {{ item }}  --namespace={{ namespace }} | awk 'FNR>1{print $3, $4}'"
+  with_items: "{{ pods.stdout.split() }}"
+  register: valid_out
+
+- name: validate pods' status and restarts
+  debug: msg="{{ item.cmd }} find {{ item.stdout }}"
+  when:
+    - valid_out|succeeded
+    - item.stdout.find("Running 0") == -1
+  with_items: "{{ valid_out.results }}"

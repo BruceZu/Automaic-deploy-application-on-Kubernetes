@@ -26,25 +26,27 @@
     prompt: "make sure the namspace {{ namespace }} is created before deployment starts"
   when: result|failed
 
+- block:
 # Ansible can not guarantee idempotency for applications on k8s cluster
 # We have to do it by ourself to validate the status of the deployments, pods,
 # containers, and services.
 # Create deplyments, pods and containers
-- include: "{{ item }}.yaml"
-  with_items:
-    - "{{ gitlab_deploy_suffix_name }}"
-    - "{{ jenkins_deploy_suffix_name }}"
-    - "{{ sonarqube_deploy_suffix_name }}"
-    - "{{ nexus_deploy_suffix_name }}"
+   - include: "{{ item }}.yaml"
+     with_items:
+       - "{{ gitlab_deploy_suffix_name }}"
+       - "{{ jenkins_deploy_suffix_name }}"
+       - "{{ sonarqube_deploy_suffix_name }}"
+       - "{{ nexus_deploy_suffix_name }}"
+
+   # Service
+   - include: "{{ item }}_svc.yaml"
+     with_items:
+       - "{{ gitlab_deploy_suffix_name }}"
+       - "{{ jenkins_deploy_suffix_name }}"
+       - "{{ sonarqube_deploy_suffix_name }}"
+       - "{{ nexus_deploy_suffix_name }}"
+
+   # Validity checking for pods and container
+   - include: validity_pod.yaml
+
   when: ns_created|succeeded
-
-# Service
-- include: "{{ item }}_svc.yaml"
-  with_items:
-    - "{{ gitlab_deploy_suffix_name }}"
-    - "{{ jenkins_deploy_suffix_name }}"
-    - "{{ sonarqube_deploy_suffix_name }}"
-    - "{{ nexus_deploy_suffix_name }}"
-
-# Validity checking for pods and container
-- include: validity_pod.yaml
